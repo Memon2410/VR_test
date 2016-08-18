@@ -77,12 +77,9 @@ var loaderCollada = new THREE.ColladaLoader();
 		});
 
 	
-
-
 function init() {
 		scene.add(dae);
 
-		console.log('init');
 		// Lights
 		scene.add(new THREE.AmbientLight(0xFFFFFF));
 		pointLight = new THREE.PointLight(0xFF3300, 2.5, 50);
@@ -93,7 +90,7 @@ function init() {
 		pointLight.position.set(-1, -0.5, 0);
 		scene.add(pointLight);
 
-		// ----------------- TEXTURE SKYBOX
+		// ----------------- TEXTURE DAE
 		var textureLoader = new THREE.TextureLoader();
 		textureEquirec = textureLoader.load('./assets/img/textures/field_pano_3.jpg');
 		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
@@ -111,7 +108,6 @@ function init() {
 
 		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
 
-
 		// Set material dae[Collada]
 		setMaterial(dae, new THREE.MeshLambertMaterial( { color: 0xFFF8D2, envMap: textureEquirec }));
 
@@ -124,21 +120,18 @@ function init() {
 				}
 			}
 		}
-		
+		// Init animation
+		requestAnimationFrame(animate);	
 	}
 
-
-
 /* VR */
-
 // Request animation frame loop function
 var lastRender = 0;
 function animate(timestamp) {
   var delta = Math.min(timestamp - lastRender, 500);
   lastRender = timestamp;
 
-  // Apply rotation to cube mesh
-  //cube.rotation.y += delta * 0.0006;
+  dae.rotation.y += delta * 0.0002;
 
   // Update VR headset position and apply to camera.
   controls.update();
@@ -161,9 +154,6 @@ function onVRDisplayPresentChange() {
   console.log('onVRDisplayPresentChange');
   onResize();
 }
-
-// Kick off animation loop.
-requestAnimationFrame(animate);
 
 // Resize the WebGL canvas when we resize and also when we change modes.
 window.addEventListener('resize', onResize);
@@ -191,5 +181,4 @@ function enterFullscreen (el) {
     el.msRequestFullscreen();
   }
 }
-
 
