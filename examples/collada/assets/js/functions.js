@@ -1,6 +1,7 @@
 /* VR */
 var pointLight;
 var dae;
+var daeTwo;
 var textureEquirec;
 
 // Setup three.js WebGL renderer. Note: Antialiasing is a big performance hit.
@@ -72,14 +73,37 @@ var loaderCollada = new THREE.ColladaLoader();
 
 			dae.updateMatrix();
 
+			addDae();
+
+		});
+
+function addDae() {
+	scene.add(dae);
+
+	var loaderColladaTwo = new THREE.ColladaLoader();
+		loaderColladaTwo.options.convertUpAxis = true;
+		loaderColladaTwo.load('./assets/models/test.dae',
+			function (collada) {
+				daeTwo = collada.scene;
+				daeTwo.traverse( function ( child ) {
+					if (child instanceof THREE.SkinnedMesh) {
+						var animation = new THREE.Animation(child, child.geometry.animation);
+						animation.play();
+					}
+				});
+
+			daeTwo.scale.x = daeTwo.scale.y = daeTwo.scale.z = 0.25;
+			daeTwo.position.z = 1;
+
+			daeTwo.updateMatrix();
+
 			init();
 			
 		});
+}
 
-	
 function init() {
-		scene.add(dae);
-
+		scene.add(daeTwo);
 		// Lights
 		scene.add(new THREE.AmbientLight(0xFFFFFF));
 		pointLight = new THREE.PointLight(0xFF3300, 2.5, 50);
@@ -110,6 +134,7 @@ function init() {
 
 		// Set material dae[Collada]
 		setMaterial(dae, new THREE.MeshLambertMaterial( { color: 0xFFF8D2, envMap: textureEquirec }));
+		setMaterial(daeTwo, new THREE.MeshLambertMaterial( { color: 0xFFF8D2, envMap: textureEquirec }));
 
 		function setMaterial(node, material) {
 			node.material = material;
@@ -132,6 +157,7 @@ function animate(timestamp) {
   lastRender = timestamp;
 
   dae.rotation.y += delta * 0.0002;
+  daeTwo.rotation.y += delta * 0.0002;
 
   // Update VR headset position and apply to camera.
   controls.update();
