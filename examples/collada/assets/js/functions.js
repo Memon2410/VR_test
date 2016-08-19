@@ -14,10 +14,8 @@ document.body.appendChild(renderer.domElement);
 
 // Create a three.js scene.
 var scene = new THREE.Scene();
-
 // Create a three.js camera.
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-
 // Apply VR headset positional data to camera.
 var controls = new THREE.VRControls(camera);
 
@@ -25,11 +23,9 @@ var controls = new THREE.VRControls(camera);
 var effect = new THREE.VREffect(renderer);
 effect.setSize(window.innerWidth, window.innerHeight);
 
+// Texture Skybox
+var textureEquirec;
 
-// Add a repeating grid as a skybox.
-var boxWidth = 5;
-var loader = new THREE.TextureLoader();
-loader.load('assets/img/box.png', onTextureLoaded);
 
 // Get the VRDisplay and save it for later.
 var vrDisplay = null;
@@ -38,22 +34,6 @@ navigator.getVRDisplays().then(function(displays) {
     vrDisplay = displays[0];
   }
 });
-
-function onTextureLoaded(texture) {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(boxWidth, boxWidth);
-
-  var geometry = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
-  var material = new THREE.MeshBasicMaterial({
-    map: texture,
-    color: 0x01BE00,
-    side: THREE.BackSide
-  });
-
-  var skybox = new THREE.Mesh(geometry, material);
-  scene.add(skybox);
-}
 
 /* Collada */
 var loaderCollada = new THREE.ColladaLoader();
@@ -114,7 +94,7 @@ function init() {
 		pointLight.position.set(-1, -0.5, 0);
 		scene.add(pointLight);
 
-		// ----------------- TEXTURE DAE
+		// ----------------- TEXTURE SKYBOX
 		var textureLoader = new THREE.TextureLoader();
 		textureEquirec = textureLoader.load('./assets/img/textures/field_pano_3.jpg');
 		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
@@ -131,6 +111,20 @@ function init() {
 		});
 
 		equirectMaterial.uniforms[ "tEquirect" ].value = textureEquirec;
+
+		var geometry = new THREE.SphereGeometry( 400.0, 24, 24 );
+		sphereMaterial = new THREE.MeshLambertMaterial( { envMap: textureEquirec } );
+		sphereMesh = new THREE.Mesh( geometry, sphereMaterial );
+		scene.add( sphereMesh );
+
+		cubeMesh = new THREE.Mesh( new THREE.BoxGeometry( 100, 100, 100 ), sphereMaterial );
+		scene.add( cubeMesh );
+
+		textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+		cubeMesh.material = equirectMaterial;
+		cubeMesh.visible = true;
+		sphereMaterial.envMap = textureEquirec;
+		sphereMaterial.needsUpdate = true;
 
 		// Set material dae[Collada]
 		setMaterial(dae, new THREE.MeshLambertMaterial( { color: 0xFFF8D2, envMap: textureEquirec }));
